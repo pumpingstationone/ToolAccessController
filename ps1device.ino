@@ -245,7 +245,7 @@ unsigned check_auth() {
     // And now we're going to call the web service to see whether
     // this tag is valid for this tool...
     auth = 0;
-    auth = checkAccess(tag1)
+    auth = checkAccess(tag1);
    
     Serial.println("-exit-");
     Serial.print("Authorization: ");
