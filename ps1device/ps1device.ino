@@ -60,14 +60,14 @@ void setup() {
 
     // set up the LCD's number of columns and rows:
     lcd.begin(16, 2);
-    
+
     lcd.setCursor(0, 0);
     lcd.print("Networking:")
     lcd.setCursor(0, 1);
 
     // start the Ethernet connection:
     Serial.println("Initialize Ethernet with DHCP:");
-    if (Ethernet.begin(mac) == 0) {        
+    if (Ethernet.begin(mac) == 0) {
         Serial.println("Failed to configure Ethernet using DHCP");
         lcd.print("No DHCP")
 
@@ -98,7 +98,7 @@ void setup() {
     pinMode(relay1Pin, OUTPUT);
 
     Serial.println("INIT DONE");
-   
+
     // Print a message to the LCD.
     lcd.print("LeBlond       ");
     lcd.setCursor(0, 1);
