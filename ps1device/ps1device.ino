@@ -12,6 +12,8 @@ const char* TOOL = "LeBlond%20Lathe";
 
 // Network stuff
 
+const char* baseURL = "GET /authcheck?device=%s&tag=%ld HTTP/1.1";
+
 // What we're going to talk to; there is only one
 // server we care about, and that's glue
 IPAddress server(10, 10, 1, 224); // glue
@@ -62,19 +64,19 @@ void setup() {
     lcd.begin(16, 2);
 
     lcd.setCursor(0, 0);
-    lcd.print("Networking:")
+    lcd.print("Networking:");
     lcd.setCursor(0, 1);
 
     // start the Ethernet connection:
     Serial.println("Initialize Ethernet with DHCP:");
     if (Ethernet.begin(mac) == 0) {
         Serial.println("Failed to configure Ethernet using DHCP");
-        lcd.print("No DHCP")
+        lcd.print("No DHCP");
 
         if (Ethernet.linkStatus() == LinkOFF) {
             Serial.println("Ethernet cable is not connected.");
             lcd.setCursor(0, 1);
-            lcd.print("Hey! No cable!")
+            lcd.print("Hey! No cable!");
         }
         // try to congifure using IP address instead of DHCP:
         Ethernet.begin(mac, ip);
@@ -100,9 +102,10 @@ void setup() {
     Serial.println("INIT DONE");
 
     // Print a message to the LCD.
-    lcd.print("LeBlond       ");
+    lcd.setCursor(0, 0);
+    lcd.print("LeBlond Lathe   ");
     lcd.setCursor(0, 1);
-    lcd.print("Please scan tag")
+    lcd.print("Please scan tag ");
     lcd.setCursor(0, 0);
 }
 
