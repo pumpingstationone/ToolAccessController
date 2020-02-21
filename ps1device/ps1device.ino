@@ -39,12 +39,12 @@ long tag1 = 0;
 long tag2 = 0;
 long save_tag = 0;
 unsigned auth = 0;
-long authTags[] = {5631946,1760256,11710121,10571990,00000000,0000000};// authorized tags
 int relay1Pin = 9 ;      // Output relay - controls high current relay
 long startTime;          // value returned from millis when captured
 long duration;           // variable to store duration
 long waitTime = 3600000;   // time to wait before turning off relay in millis 1000 milli = 1 sec
 int relayOn = 0 ;        // indicates relay is on
+long oldRemainingTime = 60;
 
 void setup() {
     /*
@@ -105,8 +105,8 @@ void setup() {
     lcd.setCursor(0, 0);
     lcd.print("LeBlond Lathe   ");
     lcd.setCursor(0, 1);
-    lcd.print("Please scan tag ");
-    lcd.setCursor(0, 0);
+    lcd.print("Please hit reset");
+    lcd.setCursor(0, 0);   
 }
 
 void loop() {
@@ -118,26 +118,37 @@ void loop() {
         } else {                         //    button was pressed twice in < so turn off
             digitalWrite(relay1Pin, LOW);  //    turn relay off
             relayOn = 0 ;                  //    indicate relay is off
-            lcd.setCursor(10,0);
-            lcd.print("        ");
+            lcd.setCursor(0, 0);
+            lcd.print("LeBlond Lathe   ");
             lcd.setCursor(0, 1);
-            lcd.print("                    ");
+            lcd.print("Please scan tag ");
+            lcd.setCursor(0, 0);
             save_tag = 0;
         }
     }
     if (relayOn == 1) {
-        Serial.print( "  millis - st = " );
-        Serial.println(( millis() - startTime ));
-        lcd.setCursor(10,0);
-        lcd.print("        ");
-        lcd.setCursor(10,0);
-        lcd.print( (( waitTime ) - (millis() - startTime ))  / 60000 );
+        //Serial.print( "  millis - st = " );
+        //Serial.println(( millis() - startTime ));        
+        lcd.setCursor(0,0);
+        lcd.print("Machine is on   ");
+        lcd.setCursor(0,1);
+        lcd.print("Time left:");
+        lcd.setCursor(11,1);
+        long remainingTime = (( waitTime ) - (millis() - startTime ))  / 60000;
+       
+        if(remainingTime < oldRemainingTime)
+        {          
+          lcd.setCursor(11,1);          
+          lcd.print(remainingTime);
+       
+          oldRemainingTime = remainingTime;
+        }
         if ((millis() - startTime) > waitTime ) {      // check to see if wait time is exceeded
             digitalWrite(relay1Pin, LOW);                   // if so      turn relay off
-            lcd.setCursor(10,0);
-            lcd.print("        ");
+            lcd.setCursor(0,0);
+            lcd.print("SHUTTING DOWN!  ");
             lcd.setCursor(0,1);
-            lcd.print("               ");
+            lcd.print("                ");
             save_tag = 0;
             relayOn  = 0;
             startTime = millis();            // set start time to current time
@@ -303,9 +314,10 @@ int checkAccess(long tag) {
     int connectedOk = 0;
 
     lcd.setCursor(0, 0);
-    lcd.print("Checking...");
+    lcd.print("Checking...     ");
     lcd.setCursor(0, 1);
-
+    lcd.print("                ");
+    
     client.setConnectionTimeout(2000);
     // if you get a connection, report back via serial:
     int rc = client.connect(server, GLUE_PORT);
