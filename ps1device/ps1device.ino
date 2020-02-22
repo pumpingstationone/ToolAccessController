@@ -45,6 +45,7 @@ long duration;           // variable to store duration
 long waitTime = 3600000;   // time to wait before turning off relay in millis 1000 milli = 1 sec
 int relayOn = 0 ;        // indicates relay is on
 long oldRemainingTime = 60;
+bool networkingOK = false;
 
 void setup() {
     /*
@@ -71,12 +72,12 @@ void setup() {
     Serial.println("Initialize Ethernet with DHCP:");
     if (Ethernet.begin(mac) == 0) {
         Serial.println("Failed to configure Ethernet using DHCP");
-        lcd.print("No DHCP");
+        lcd.print("No DHCP         ");
 
         if (Ethernet.linkStatus() == LinkOFF) {
             Serial.println("Ethernet cable is not connected.");
             lcd.setCursor(0, 1);
-            lcd.print("Hey! No cable!");
+            lcd.print("Hey! No cable!  ");
         }
         // try to congifure using IP address instead of DHCP:
         Ethernet.begin(mac, ip);
@@ -84,6 +85,7 @@ void setup() {
         Serial.print("  DHCP assigned IP ");
         Serial.println(Ethernet.localIP());
         lcd.print("Got: " + Ethernet.localIP());
+        networkingOK = true;
     }
 
     // give the Ethernet shield a second to initialize:
@@ -101,12 +103,20 @@ void setup() {
 
     Serial.println("INIT DONE");
 
-    // Print a message to the LCD.
-    lcd.setCursor(0, 0);
-    lcd.print("LeBlond Lathe   ");
-    lcd.setCursor(0, 1);
-    lcd.print("Please hit reset");
-    lcd.setCursor(0, 0);   
+    if (networkingOK) {
+      // Print a message to the LCD.
+      lcd.setCursor(0, 0);
+      lcd.print("LeBlond Lathe   ");
+      lcd.setCursor(0, 1);
+      lcd.print("Please hit reset");
+      lcd.setCursor(0, 0);
+    } else {
+      lcd.setCursor(0, 0);
+      lcd.print("** NO NETWORK **");
+      lcd.setCursor(0, 1);
+      lcd.print("** USE BYPASS **");
+      lcd.setCursor(0, 0);
+    }
 }
 
 void loop() {
@@ -116,6 +126,7 @@ void loop() {
             startTime = millis();           //   reset time relay was turned on
             delay(200);
         } else {                         //    button was pressed twice in < so turn off
+            Serial.println("Reset button was pressed!");
             digitalWrite(relay1Pin, LOW);  //    turn relay off
             relayOn = 0 ;                  //    indicate relay is off
             lcd.setCursor(0, 0);
@@ -124,16 +135,18 @@ void loop() {
             lcd.print("Please scan tag ");
             lcd.setCursor(0, 0);
             save_tag = 0;
+            oldRemainingTime = 60;
         }
     }
     if (relayOn == 1) {
         //Serial.print( "  millis - st = " );
         //Serial.println(( millis() - startTime ));        
         lcd.setCursor(0,0);
-        lcd.print("Machine is on   ");
+        lcd.print("Machine is on   ");        
         lcd.setCursor(0,1);
         lcd.print("Time left:");
-        lcd.setCursor(11,1);
+        //lcd.setCursor(11,1);
+        //lcd.print("  ");
         long remainingTime = (( waitTime ) - (millis() - startTime ))  / 60000;
        
         if(remainingTime < oldRemainingTime)
@@ -188,11 +201,10 @@ void loop() {
 
                 unsigned auth = check_auth();      // check for authorization
 
-                lcd.setCursor(6, 1);
-                lcd.print(" NOT auth");
+                
                 if (auth == 1 )  {
-                    lcd.setCursor(6, 1);
-                    lcd.print("Tag OK    ");
+                    //lcd.setCursor(6, 1);
+                    //lcd.print("Tag OK    ");
                     digitalWrite(relay1Pin, HIGH);  //   actvate relay
                     relayOn  = 1 ;                  //   indicate relay is on
                     startTime = millis();           //   set time relay was turned on
@@ -202,6 +214,9 @@ void loop() {
                     Serial.println("--");
                     Serial.print( "startTime :");
                     Serial.println(startTime);
+                } else {
+                  lcd.setCursor(6, 1);
+                  lcd.print(" NOT auth");
                 }
 
             }
@@ -349,6 +364,7 @@ int checkAccess(long tag) {
 
     if (connectedOk == 0) {
         Serial.println("Did not connect, so not allowing access");
+        lcd.setCursor(0, 0);        
         lcd.print("No connection :(");
         return 0;
     }
